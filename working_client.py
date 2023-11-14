@@ -1,9 +1,18 @@
-import socket
+import base64
 import readline
+import socket
+import subprocess
+import os
+import paramiko
+from paramiko import RSAKey
+
+PRIVATE_KEY_FILE = "private_key.pem"
+
 
 class ServerDirectoryCompleter:
-    def __init__(self, client_socket):
+    def __init__(self, client_socket, private_key):
         self.client_socket = client_socket
+        self.private_key = private_key
         self.directories = []
 
     def complete(self, text, state):
@@ -22,13 +31,15 @@ class ServerDirectoryCompleter:
         directories = self.client_socket.recv(4096).decode('utf-8').split('\n')
         self.directories = [directory for directory in directories if directory]  # Remove empty strings
 
+
 def get_server_directory(client_socket):
     client_socket.send("getcwd".encode('utf-8'))
     server_directory = client_socket.recv(4096).decode('utf-8')
     return server_directory
 
-def send_command(client_socket):
-    completer = ServerDirectoryCompleter(client_socket)
+
+def send_command(client_socket, private_key):
+    completer = ServerDirectoryCompleter(client_socket, private_key)
     readline.set_completer(completer.complete)
     readline.parse_and_bind("tab: complete")
 
@@ -68,11 +79,50 @@ def send_command(client_socket):
     finally:
         client_socket.close()
 
-if __name__ == "__main__":
-    server_host = input("Enter the server host: ")
-    server_port = int(input("Enter the server port: "))  # Use the same port as in the server script
+
+def generate_key_pair():
+    private_key = RSAKey.generate(2048)
+    with open(PRIVATE_KEY_FILE, "wb") as private_key_file:
+        private_key.write_private_key_file(private_key_file)
+
+    return private_key
+
+
+def main():
+    server_host =  "192.168.1.101"  #input("Enter the server host: ")
+    server_port = 12349 #int(input("Enter the server port: "))  # Use the same port as in the server script
+
+    private_key = None
+
+    try:
+        with open(PRIVATE_KEY_FILE, "rb") as private_key_file:
+            private_key = RSAKey(filename=PRIVATE_KEY_FILE)
+
+    except FileNotFoundError:
+        print("Generating a new RSA key pair.")
+        private_key = generate_key_pair()
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((server_host, server_port))
 
-    send_command(client_socket)
+    try:
+        public_key_data = private_key.get_base64().encode('utf-8')
+        print(f"Sending public key data:\n{public_key_data.decode('utf-8')}")
+
+
+        client_socket.send(public_key_data)
+
+        auth_response = client_socket.recv(1024).decode('utf-8')
+        print(auth_response)
+        if auth_response == "SSH_AUTH_SUCCESS":
+            print("Server authentication successful.")
+            send_command(client_socket, private_key)
+        else:
+            print("Server authentication failed. Closing connection.")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        client_socket.close()
+
+if __name__ == "__main__":
+    main()
