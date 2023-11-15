@@ -89,8 +89,8 @@ def generate_key_pair():
 
 
 def main():
-    server_host =  "192.168.1.101"  #input("Enter the server host: ")
-    server_port = 12349 #int(input("Enter the server port: "))  # Use the same port as in the server script
+    server_host = input("Enter the server host: ")
+    server_port = int(input("Enter the server port: "))  # Use the same port as in the server script
 
     private_key = None
 
