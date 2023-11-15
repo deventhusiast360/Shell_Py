@@ -63,15 +63,15 @@ def authenticate_client(client_socket, authorized_keys):
 
     try:
         received_key_base64 = public_key_data.decode('utf-8', errors='ignore').strip()
-        logger.info(f"Received public key data: {public_key_data}")
+        # logger.info(f"Received public key data: {public_key_data}")
 
     except Exception as e:
-        logger.error(f"Error decoding or extracting key: {e}")
+        # logger.error(f"Error decoding or extracting key: {e}")
         client_socket.send(b"SSH_AUTH_FAILURE")
         return None
 
     authorized_keys_base64 = [key.strip() for key in authorized_keys]  # Strip leading/trailing whitespaces
-    logger.info(f"Authorized keys: {authorized_keys_base64}")
+    # logger.info(f"Authorized keys: {authorized_keys_base64}")
 
     for key_str in authorized_keys_base64:
         key = RSAKey(data=base64.b64decode(key_str))
@@ -80,7 +80,7 @@ def authenticate_client(client_socket, authorized_keys):
             client_socket.send(b"SSH_AUTH_SUCCESS")
             return key
 
-    logger.info(f"Client authentication failed. Received key not in authorized keys: {received_key_base64}")
+    logger.info("Client authentication failed. Key is not authorized")
     client_socket.send(b"SSH_AUTH_FAILURE")
     return None
 
@@ -97,7 +97,7 @@ def handle_authenticated_client(client_socket, key):
                     logger.info("Connection closed by the client.")
                     break
 
-                logger.info(f"Received command: {data}")
+                # logger.info(f"Received command: {data}")
 
                 if data.lower() == "getcwd":
                     client_socket.send(os.getcwd().encode('utf-8'))
