@@ -4,8 +4,6 @@ The server-side Python script establishes secure remote command execution, uses 
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
