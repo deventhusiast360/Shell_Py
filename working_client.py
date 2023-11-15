@@ -108,7 +108,7 @@ def main():
     try:
         
         public_key_data = private_key.get_base64().encode('utf-8')
-        print(f"Sending public key data:\n{public_key_data.decode('utf-8')}")
+        #print(f"Sending public key data:\n{public_key_data.decode('utf-8')}")
 
 
         client_socket.send(public_key_data)
