@@ -3,15 +3,9 @@ The server-side Python script establishes secure remote command execution, uses 
 
 ## Table of Contents
 
-- [Demo](#demo)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Host](#host)
-
-## Demo
-This is a working demo
-
-![Shell_Py](https://github.com/deventhusiast360/Shell_Py/assets/123263512/dbee84fe-abf8-47d9-bee9-90096b45b84f)
 
 ## Installation
 
